@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Teaching Readiness Assessment</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;color:#1a1a1a;background:#fff;padding:1.5rem;max-width:720px;margin:0 auto}
+
+h1{font-size:22px;font-weight:600;margin-bottom:.4rem}
+.quiz-header p{font-size:14px;color:#555;line-height:1.6;margin-bottom:1rem}
+.quiz-header{border-bottom:1px solid #e0e0e0;padding-bottom:1.25rem;margin-bottom:2rem}
+
+.progress-bar{height:4px;background:#e8e8e8;border-radius:2px;margin-bottom:.4rem}
+.progress-fill{height:100%;background:#0F6E56;border-radius:2px;transition:width .3s}
+.prog-label{font-size:12px;color:#777}
+
+.section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#888;margin-bottom:.5rem}
+.section-title{font-size:17px;font-weight:600;margin-bottom:.25rem}
+.section-sub{font-size:13px;color:#666;line-height:1.5;margin-bottom:1.25rem}
+
+.section-block{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid #e8e8e8}
+.section-block:last-of-type{border-bottom:none}
+
+.q-block{margin-bottom:1.5rem}
+.q-text{font-size:15px;font-weight:500;margin-bottom:.75rem;line-height:1.5}
+.q-options{display:flex;flex-direction:column;gap:6px}
+.q-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #ddd;border-radius:8px;cursor:pointer;transition:background .12s,border-color .12s;font-size:14px;color:#1a1a1a;background:#fff}
+.q-opt:hover{background:#f5f5f5;border-color:#bbb}
+.q-opt.selected{background:#E1F5EE;border-color:#1D9E75;color:#0F6E56}
+.q-opt input[type=radio]{accent-color:#1D9E75;width:15px;height:15px;flex-shrink:0}
+
+#submit-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 28px;border-radius:8px;
+  background:#0F6E56;color:#fff;border:none;
+  font-size:15px;font-weight:500;cursor:pointer;
+  margin-top:1rem
+}
+#submit-btn:hover{background:#085041}
+#submit-btn:disabled{opacity:.4;cursor:not-allowed}
+#submit-msg{font-size:13px;color:#A32D2D;margin-top:.5rem;display:none}
+
+/* Results */
+#results{display:none}
+.res-title{font-size:20px;font-weight:600;margin-bottom:.5rem}
+.res-intro{font-size:14px;color:#555;line-height:1.6;margin-bottom:1.5rem}
+
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.score-card{background:#f5f5f5;border-radius:8px;padding:1rem 1.25rem}
+.score-card-label{font-size:12px;color:#666;margin-bottom:.4rem}
+.score-card-val{font-size:26px;font-weight:600}
+.score-card-sub{font-size:12px;margin-top:.25rem}
+.green .score-card-val{color:#0F6E56}
+.green .score-card-sub{color:#0F6E56}
+.amber .score-card-val{color:#BA7517}
+.amber .score-card-sub{color:#BA7517}
+.red .score-card-val{color:#A32D2D}
+.red .score-card-sub{color:#A32D2D}
+
+.band{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:8px;font-size:14px;margin-bottom:1.5rem}
+.band.ready{background:#E1F5EE;color:#0F6E56;border:1px solid #1D9E75}
+.band.developing{background:#FAEEDA;color:#BA7517;border:1px solid #EF9F27}
+.band.emerging{background:#FCEBEB;color:#A32D2D;border:1px solid #F09595}
+
+.res-divider{border:none;border-top:1px solid #e8e8e8;margin:1.5rem 0}
+
+.feedback-section{margin-bottom:1.5rem;padding:1.25rem;border:1px solid #e8e8e8;border-radius:12px;background:#fff}
+.fb-head{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.fb-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.fb-icon.tech{background:#E6F1FB;color:#185FA5}
+.fb-icon.admin{background:#FAEEDA;color:#BA7517}
+.fb-icon.ped{background:#E1F5EE;color:#0F6E56}
+.fb-head-text{flex:1;min-width:0}
+.fb-head-text h3{font-size:15px;font-weight:600;margin-bottom:2px}
+.fb-head-text p{font-size:12px;color:#777}
+.score-pill{font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.pill-green{background:#E1F5EE;color:#0F6E56}
+.pill-amber{background:#FAEEDA;color:#BA7517}
+.pill-red{background:#FCEBEB;color:#A32D2D}
+
+.fb-narrative{font-size:14px;line-height:1.6;color:#1a1a1a;margin-bottom:.75rem}
+
+.support-heading{font-size:12px;font-weight:600;color:#666;margin-bottom:.5rem;margin-top:.75rem}
+.support-items{display:flex;flex-direction:column;gap:6px}
+.support-item{font-size:13px;line-height:1.5;color:#1a1a1a;padding-left:1.1rem;position:relative}
+.support-item::before{content:'•';position:absolute;left:0;color:#888}
+.support-item a{color:#0F6E56}
+
+.res-note{font-size:13px;color:#666;line-height:1.6;padding:1rem;background:#f5f5f5;border-radius:8px;margin-top:1.5rem}
+</style>
+</head>
+<body>
+
+<div id="quiz-wrap">
+  <div class="quiz-header">
+    <h1>Online Teaching Readiness Assessment</h1>
+    <p>This self-assessment helps you identify strengths and growth areas as you prepare to teach online. There are no right or wrong answers — respond honestly to get the most useful feedback.</p>
+    <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <p class="prog-label"><span id="prog-label">0 of 15</span> questions answered</p>
+  </div>
+
+  <div id="quiz-form">
+
+    <!-- PART 1: TECHNICAL -->
+    <div class="section-block">
+      <div class="section-label">Part 1 of 3</div>
+      <div class="section-title">Technical Competencies</div>
+      <div class="section-sub">Rate your confidence using Canvas and essential digital tools to build, manage, and deliver your course.</div>
+
+      <div class="q-block" data-q="1" data-section="tech">
+        <div class="q-text">1. I can navigate Canvas to access course materials, the gradebook, and communication tools.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q1" value="4"> Confidently — I use Canvas regularly without support</label>
+          <label class="q-opt"><input type="radio" name="q1" value="3"> Mostly — I can find what I need with some trial and error</label>
+          <label class="q-opt"><input type="radio" name="q1" value="2"> Somewhat — I rely on guides or help fairly often</label>
+          <label class="q-opt"><input type="radio" name="q1" value="1"> Not yet — Canvas is new to me</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="2" data-section="tech">
+        <div class="q-text">2. I can create and organize course content in Canvas (modules, pages, files, assignments).</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q2" value="4"> Confidently</label>
+          <label class="q-opt"><input type="radio" name="q2" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q2" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q2" value="1"> Not yet</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="3" data-section="tech">
+        <div class="q-text">3. I can use Canvas to communicate with students (Announcements, Inbox, or integrated tools).</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q3" value="4"> Confidently</label>
+          <label class="q-opt"><input type="radio" name="q3" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q3" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q3" value="1"> Not yet</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="4" data-section="tech">
+        <div class="q-text">4. I am comfortable troubleshooting basic technical issues (broken links, submission problems, display errors) before contacting support.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q4" value="4"> Confidently</label>
+          <label class="q-opt"><input type="radio" name="q4" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q4" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q4" value="1"> Not yet</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="5" data-section="tech">
+        <div class="q-text">5. I can set up and manage the Canvas Gradebook, including entering grades, using rubrics, and adjusting grade display settings.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q5" value="4"> Confidently</label>
+          <label class="q-opt"><input type="radio" name="q5" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q5" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q5" value="1"> Not yet</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 2: ADMINISTRATIVE -->
+    <div class="section-block">
+      <div class="section-label">Part 2 of 3</div>
+      <div class="section-title">Administrative Competencies</div>
+      <div class="section-sub">Rate your readiness to manage course policies, communication standards, grading, and institutional compliance.</div>
+
+      <div class="q-block" data-q="6" data-section="admin">
+        <div class="q-text">6. I understand MBU's expectations for how quickly I respond to student messages and grade submitted work.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q6" value="4"> Fully — I know the specific timelines expected</label>
+          <label class="q-opt"><input type="radio" name="q6" value="3"> Mostly — I have a general sense but not all details</label>
+          <label class="q-opt"><input type="radio" name="q6" value="2"> Somewhat — I am aware standards exist but need to review them</label>
+          <label class="q-opt"><input type="radio" name="q6" value="1"> Not yet — I need to find out what is expected</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="7" data-section="admin">
+        <div class="q-text">7. I am familiar with FERPA requirements and how they apply to sharing student information in an online course.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q7" value="4"> Fully</label>
+          <label class="q-opt"><input type="radio" name="q7" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q7" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q7" value="1"> Not yet</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="8" data-section="admin">
+        <div class="q-text">8. I know the institutional resources available to me when a student dispute, academic integrity concern, or policy question arises.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q8" value="4"> Fully</label>
+          <label class="q-opt"><input type="radio" name="q8" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q8" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q8" value="1"> Not yet</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="9" data-section="admin">
+        <div class="q-text">9. I can construct a complete, compliant course syllabus that meets MBU's required elements.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q9" value="4"> Fully — I have done this before for MBU</label>
+          <label class="q-opt"><input type="radio" name="q9" value="3"> Mostly — I can do it with the Simple Syllabus tool</label>
+          <label class="q-opt"><input type="radio" name="q9" value="2"> Somewhat — I will need help identifying required elements</label>
+          <label class="q-opt"><input type="radio" name="q9" value="1"> Not yet — I have not created an MBU syllabus</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="10" data-section="admin">
+        <div class="q-text">10. I understand how to use Canvas rubrics to provide consistent, transparent feedback to students.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q10" value="4"> Confidently</label>
+          <label class="q-opt"><input type="radio" name="q10" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q10" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q10" value="1"> Not yet</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 3: PEDAGOGICAL -->
+    <div class="section-block">
+      <div class="section-label">Part 3 of 3</div>
+      <div class="section-title">Pedagogical Competencies</div>
+      <div class="section-sub">Rate your confidence in designing and facilitating an engaging online learning experience that builds community and supports student success.</div>
+
+      <div class="q-block" data-q="11" data-section="ped">
+        <div class="q-text">11. I have strategies for making students feel connected and supported in an online course (social presence, regular check-ins, community building).</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q11" value="4"> Yes — I actively use several strategies</label>
+          <label class="q-opt"><input type="radio" name="q11" value="3"> Somewhat — I use a few but want to expand</label>
+          <label class="q-opt"><input type="radio" name="q11" value="2"> Beginning — I know this matters but need ideas</label>
+          <label class="q-opt"><input type="radio" name="q11" value="1"> Not yet — this is new territory for me</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="12" data-section="ped">
+        <div class="q-text">12. I design discussions and activities that promote critical thinking and meaningful peer interaction, not just compliance posting.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q12" value="4"> Confidently</label>
+          <label class="q-opt"><input type="radio" name="q12" value="3"> Mostly</label>
+          <label class="q-opt"><input type="radio" name="q12" value="2"> Somewhat</label>
+          <label class="q-opt"><input type="radio" name="q12" value="1"> Not yet</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="13" data-section="ped">
+        <div class="q-text">13. I provide feedback on student work that is specific, timely, and helps students improve — not just a score.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q13" value="4"> Consistently</label>
+          <label class="q-opt"><input type="radio" name="q13" value="3"> Usually</label>
+          <label class="q-opt"><input type="radio" name="q13" value="2"> Sometimes</label>
+          <label class="q-opt"><input type="radio" name="q13" value="1"> Rarely — I am working on this</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="14" data-section="ped">
+        <div class="q-text">14. I know how to monitor student progress in Canvas and recognize early warning signs that a student may be disengaging.</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q14" value="4"> Fully — I use course statistics and analytics regularly</label>
+          <label class="q-opt"><input type="radio" name="q14" value="3"> Mostly — I check in but may not be using all available tools</label>
+          <label class="q-opt"><input type="radio" name="q14" value="2"> Somewhat — I monitor grades but not broader engagement data</label>
+          <label class="q-opt"><input type="radio" name="q14" value="1"> Not yet — I did not know this was possible in Canvas</label>
+        </div>
+      </div>
+
+      <div class="q-block" data-q="15" data-section="ped">
+        <div class="q-text">15. I am aware of accessibility considerations for online course content (captions, alt text, color contrast, readable document structure).</div>
+        <div class="q-options">
+          <label class="q-opt"><input type="radio" name="q15" value="4"> Fully — I apply accessibility standards in my course design</label>
+          <label class="q-opt"><input type="radio" name="q15" value="3"> Mostly — I address major items but know I can improve</label>
+          <label class="q-opt"><input type="radio" name="q15" value="2"> Somewhat — I know accessibility matters but am unsure where to start</label>
+          <label class="q-opt"><input type="radio" name="q15" value="1"> Not yet — this is new to me</label>
+        </div>
+      </div>
+    </div>
+
+    <button id="submit-btn" disabled onclick="submitQuiz()">&#10003; View my results</button>
+    <p id="submit-msg">Please answer all 15 questions before submitting.</p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="res-title">Your Readiness Profile</div>
+    <div class="res-intro">Here is how you scored across the three competency areas. Use this profile to guide your preparation before your course begins.</div>
+    <div class="score-grid" id="score-grid"></div>
+    <div id="overall-band"></div>
+    <hr class="res-divider">
+    <div id="feedback-blocks"></div>
+    <div class="res-note">&#9432; This assessment is for your own reflection — scores are not recorded or shared. Revisit it any time as you grow in your online teaching practice.</div>
+  </div>
+</div>
+
+<script>
+const total = 15;
+let answered = new Set();
+
+function updateProgress() {
+  const n = answered.size;
+  document.getElementById('prog').style.width = (n / total * 100) + '%';
+  document.getElementById('prog-label').textContent = n + ' of ' + total;
+  document.getElementById('submit-btn').disabled = (n < total);
+}
+
+document.querySelectorAll('.q-opt input[type=radio]').forEach(function(inp) {
+  inp.addEventListener('change', function() {
+    var qBlock = this.closest('.q-block');
+    qBlock.querySelectorAll('.q-opt').forEach(function(o) { o.classList.remove('selected'); });
+    this.closest('.q-opt').classList.add('selected');
+    answered.add(this.name);
+    updateProgress();
+  });
+});
+
+function getBand(pct) {
+  if (pct >= 75) return { label: 'Ready to teach', cls: 'ready', icon: '&#10003;' };
+  if (pct >= 50) return { label: 'Developing &mdash; targeted support recommended', cls: 'developing', icon: '&#9888;' };
+  return { label: 'Emerging &mdash; foundational support recommended', cls: 'emerging', icon: '&#9888;' };
+}
+
+function getPill(pct) {
+  if (pct >= 75) return { cls: 'pill-green', text: 'Ready' };
+  if (pct >= 50) return { cls: 'pill-amber', text: 'Developing' };
+  return { cls: 'pill-red', text: 'Emerging' };
+}
+
+function getCardCls(pct) {
+  if (pct >= 75) return 'green';
+  if (pct >= 50) return 'amber';
+  return 'red';
+}
+
+var sections = [
+  {
+    key: 'tech', label: 'Technical', iconCls: 'tech', icon: '&#128187;',
+    title: 'Technical Competencies',
+    sub: 'Using Canvas and digital tools to build, manage, and deliver your course.',
+    ready: 'Your technical foundation is solid. Continue building fluency in Canvas features you use less frequently.',
+    developing: 'Focus on hands-on practice in your Canvas Sandbox course and complete <em>Growing with Canvas</em> modules.',
+    emerging: 'Prioritize <em>Growing with Canvas</em> before your course opens. Canvas 24/7 support (Help icon in the NavBar) is available any time.',
+    support: [
+      'Practice in your Canvas Sandbox course &mdash; every MBU instructor has two Sandbox courses.',
+      '<a href="#">Growing with Canvas</a> &mdash; enrolled automatically for all MBU faculty (navigation, gradebook, communication tools, file management).',
+      '<a href="https://community.canvaslms.com/t5/Instructor-Guide/tkb-p/Instructor" target="_blank">Canvas Instructor Guide</a>',
+      'Canvas 24/7 Help &mdash; click the Help icon in the Canvas NavBar for phone or chat support.',
+      '<a href="https://mobap.instructure.com/courses/16" target="_blank">Online Faculty Resources</a> &mdash; tutorials and quick-reference guides.'
+    ]
+  },
+  {
+    key: 'admin', label: 'Administrative', iconCls: 'admin', icon: '&#128203;',
+    title: 'Administrative Competencies',
+    sub: 'Managing policies, student communication, grading, and institutional compliance.',
+    ready: 'You have strong administrative footing. Review MBU\'s Instructor Information page to confirm your commitments align with institutional standards.',
+    developing: 'Review MBU\'s minimum standards for communication and feedback on the Instructor Information page in your course template.',
+    emerging: 'Connect with your College\'s Simple Syllabus support contact and review MBU\'s FERPA policy and communication expectations before your course opens.',
+    support: [
+      'Review the <em>My Commitments as Your Instructor</em> statement on the Instructor Information page &mdash; required for all online courses.',
+      'For syllabus assistance, contact your College\'s Simple Syllabus support person.',
+      'For student conflict or conduct concerns: <a href="mailto:deanofstudents@mobap.edu">deanofstudents@mobap.edu</a>',
+      'For non-Canvas technical issues: <a href="mailto:helpdesk@mobap.edu">helpdesk@mobap.edu</a>',
+      '<a href="https://www.mobap.edu/academics/ferpa/" target="_blank">MBU FERPA Policy</a>',
+      '<a href="https://www.facultyfocus.com/" target="_blank">Faculty Focus: The Online Educator\'s Complete Guide to Grading Assignments</a>'
+    ]
+  },
+  {
+    key: 'ped', label: 'Pedagogical', iconCls: 'ped', icon: '&#127979;',
+    title: 'Pedagogical Competencies',
+    sub: 'Designing and facilitating engaging, community-centered online learning experiences.',
+    ready: 'Your instructional practice is strong. Consider exploring advanced strategies for asynchronous engagement and inclusive design.',
+    developing: 'Explore strategies for social presence and asynchronous discussion facilitation. Review the Netiquette page and student progress monitoring tools in your course template.',
+    emerging: 'Focus on the <em>Growing with Canvas</em> communication and rubric modules, and review the Student Support module for monitoring student progress with course statistics.',
+    support: [
+      'Explore the Classroom Netiquette page in the <em>Canvas &amp; the Online Classroom</em> module in your course template.',
+      'Review the Student Support module lesson on monitoring progress with Canvas course statistics.',
+      '<em>Growing with Canvas</em> &mdash; announcements, communication tools, and rubrics modules.',
+      '<a href="https://community.canvaslms.com/t5/Accessibility/tkb-p/accessibility" target="_blank">Canvas Seven Pillars of Accessibility</a>',
+      'Faculty Focus: Synchronous and Asynchronous Learning Tools &mdash; 15 Strategies for Engaging Online Students.',
+      'Faculty Focus: Understanding Adult Learners\' Needs.'
+    ]
+  }
+];
+
+function submitQuiz() {
+  var missing = false;
+  for (var i = 1; i <= 15; i++) {
+    if (!document.querySelector('input[name="q' + i + '"]:checked')) { missing = true; break; }
+  }
+  if (missing) {
+    document.getElementById('submit-msg').style.display = 'block';
+    return;
+  }
+  document.getElementById('submit-msg').style.display = 'none';
+
+  var scores = { tech: [], admin: [], ped: [] };
+  document.querySelectorAll('.q-block').forEach(function(b) {
+    var sec = b.dataset.section;
+    var q = b.dataset.q;
+    var val = parseInt(document.querySelector('input[name="q' + q + '"]:checked').value);
+    scores[sec].push(val);
+  });
+
+  var pct = {};
+  sections.forEach(function(s) {
+    var arr = scores[s.key];
+    var raw = arr.reduce(function(a, b) { return a + b; }, 0);
+    pct[s.key] = Math.round(raw / (arr.length * 4) * 100);
+  });
+  var overall = Math.round((pct.tech + pct.admin + pct.ped) / 3);
+
+  var grid = document.getElementById('score-grid');
+  grid.innerHTML = '';
+  sections.forEach(function(s) {
+    var p = pct[s.key];
+    var cls = getCardCls(p);
+    var band = getBand(p);
+    grid.innerHTML += '<div class="score-card ' + cls + '"><div class="score-card-label">' + s.label + '</div><div class="score-card-val">' + p + '%</div><div class="score-card-sub">' + band.label.split('&mdash;')[0].trim() + '</div></div>';
+  });
+  var oc = getCardCls(overall);
+  var ob2 = getBand(overall);
+  grid.innerHTML += '<div class="score-card ' + oc + '"><div class="score-card-label">Overall</div><div class="score-card-val">' + overall + '%</div><div class="score-card-sub">' + ob2.label.split('&mdash;')[0].trim() + '</div></div>';
+
+  var ob = getBand(overall);
+  document.getElementById('overall-band').innerHTML = '<div class="band ' + ob.cls + '"><span>' + ob.icon + '</span><span>' + ob.label + '</span></div>';
+
+  var fb = document.getElementById('feedback-blocks');
+  fb.innerHTML = '';
+  sections.forEach(function(s) {
+    var p = pct[s.key];
+    var pill = getPill(p);
+    var msg = p >= 75 ? s.ready : (p >= 50 ? s.developing : s.emerging);
+    var showSupport = p < 75;
+    var supportHtml = '';
+    if (showSupport) {
+      supportHtml = '<div class="support-heading">Resources &amp; support</div><div class="support-items">' +
+        s.support.map(function(i) { return '<div class="support-item">' + i + '</div>'; }).join('') +
+        '</div>';
+    }
+    fb.innerHTML += '<div class="feedback-section">' +
+      '<div class="fb-head">' +
+        '<div class="fb-icon ' + s.iconCls + '">' + s.icon + '</div>' +
+        '<div class="fb-head-text"><h3>' + s.title + '</h3><p>' + s.sub + '</p></div>' +
+        '<span class="score-pill ' + pill.cls + '">' + p + '% &middot; ' + pill.text + '</span>' +
+      '</div>' +
+      '<p class="fb-narrative">' + msg + '</p>' +
+      supportHtml +
+      '</div>';
+  });
+
+  document.getElementById('quiz-form').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
